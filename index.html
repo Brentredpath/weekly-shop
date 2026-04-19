@@ -759,11 +759,11 @@ window.addEventListener('DOMContentLoaded',async ()=>{
   updateBtn();renderWeekTab();
   const saved=ls.get('mise_current_list',null);
   if(saved){listData=saved;renderFridgeList();document.getElementById('tabbar-shop').style.display='';}
-  // Auto-pull from JSONBin every 2 minutes
+  // Auto-pull from JSONBin every 30 seconds
   setInterval(async()=>{
     const ok=await syncLoad();
-    if(ok){renderPicker();renderMealPrepPicker();renderSaved();renderStaplesList();renderRegularsList();updateBtn();}
-  },120000);
+    if(ok){renderPicker();renderMealPrepPicker();renderSaved();renderStaplesList();renderRegularsList();updateBtn();renderWeekTab();if(listData){renderFridgeList();document.getElementById('tabbar-shop').style.display='';}}
+  },30000);
   // Pre-fill JSONBin credentials if set
   const key=ls.get(JBIN_KEY,null),bin=ls.get(JBIN_BIN,null);
   if(key)document.getElementById('jbin-key-input').value=key;

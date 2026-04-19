@@ -630,10 +630,11 @@ const ls={get:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v)
 const JBIN_KEY='mise_jbin_key';
 const ANT_KEY='mise_anthropic_key';
 const JBIN_BIN='mise_jbin_bin';
+let syncLoaded=false;
 
 async function syncLoad(){
   const key=ls.get(JBIN_KEY,null),bin=ls.get(JBIN_BIN,null);
-  if(!key||!bin)return false;
+  if(!key||!bin){syncLoaded=true;return false;}
   try{
     // Try with X-Master-Key first, then X-Access-Key
     let res=await fetch('https://api.jsonbin.io/v3/b/'+bin+'/latest',{headers:{'X-Master-Key':key,'X-Bin-Meta':'false'}});
@@ -675,11 +676,13 @@ async function syncLoad(){
     if(data.regularsState){
       regularStates=data.regularsState;ls.set(K.regularsState,regularStates);
     }
+    syncLoaded=true;
     return true;
   }catch(e){console.log('Sync load failed:',e);return false;}
 }
 
 async function syncSave(){
+  if(!syncLoaded){console.log('Sync save blocked — waiting for first load');return;}
   const key=ls.get(JBIN_KEY,null),bin=ls.get(JBIN_BIN,null);
   if(!key||!bin){console.log('Sync skipped — no credentials');return;}
   try{
@@ -751,6 +754,12 @@ window.addEventListener('DOMContentLoaded',async ()=>{
   if(hash.startsWith('list=')){loadShared(hash.slice(5));return;}
   checkWeekReset();
   initChefBanner();
+  // Set up credentials BEFORE syncLoad so a fresh session can still sync
+  const DEF_BIN='69db859c36566621a8a53f4e';
+  const DEF_KEY='$2a$10$dweo4CNZnOACQu6Uwb1.le8UsYmFPLAtQ3OeipXRjFh6dryU626nS';
+  const key=ls.get(JBIN_KEY,null),bin=ls.get(JBIN_BIN,null);
+  if(!key){ls.set(JBIN_KEY,DEF_KEY);}
+  if(!bin){ls.set(JBIN_BIN,DEF_BIN);}
   // Try to load from JSONBin first
   const synced=await syncLoad();
   if(synced)showSyncStatus('Synced ✓',true);
@@ -764,21 +773,12 @@ window.addEventListener('DOMContentLoaded',async ()=>{
     const ok=await syncLoad();
     if(ok){renderPicker();renderMealPrepPicker();renderSaved();renderStaplesList();renderRegularsList();updateBtn();renderWeekTab();if(listData){renderFridgeList();document.getElementById('tabbar-shop').style.display='';}}
   },30000);
-  // Pre-fill JSONBin credentials if set
-  const key=ls.get(JBIN_KEY,null),bin=ls.get(JBIN_BIN,null);
-  if(key)document.getElementById('jbin-key-input').value=key;
-  if(bin)document.getElementById('jbin-bin-input').value=bin;
-  const DEF_ANT_KEY='';// User enters their own Anthropic key
+  // Pre-fill settings inputs
+  document.getElementById('jbin-key-input').value=ls.get(JBIN_KEY,'');
+  document.getElementById('jbin-bin-input').value=ls.get(JBIN_BIN,'');
   const antKey=ls.get(ANT_KEY,null);
   const antInput=document.getElementById('anthropic-key-input');
   if(antKey&&antInput)antInput.value=antKey;
-  // Pre-fill credentials AND save to localStorage so sync actually works
-  const DEF_BIN='69db859c36566621a8a53f4e';
-  const DEF_KEY='$2a$10$dweo4CNZnOACQu6Uwb1.le8UsYmFPLAtQ3OeipXRjFh6dryU626nS';
-  if(!key){ls.set(JBIN_KEY,DEF_KEY);document.getElementById('jbin-key-input').value=DEF_KEY;}
-  else{document.getElementById('jbin-key-input').value=key;}
-  if(!bin){ls.set(JBIN_BIN,DEF_BIN);document.getElementById('jbin-bin-input').value=DEF_BIN;}
-  else{document.getElementById('jbin-bin-input').value=bin;}
 });
 
 function showMainPage(name){

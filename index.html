@@ -352,7 +352,7 @@ textarea.field{resize:vertical;line-height:1.6;}
     <div class="manage-tabs">
       <button class="mtab active" id="tab-recipes" onclick="switchMTab('recipes')">Recipes</button>
       <button class="mtab" id="tab-staples" onclick="switchMTab('staples')">Essentials</button>
-      <button class="mtab" id="tab-regulars" onclick="switchMTab('regulars')">Staples</button>
+      <button class="mtab" id="tab-regulars" onclick="switchMTab('regulars')">Favourites</button>
       <button class="mtab" id="tab-backup" onclick="switchMTab('backup')">Backup</button>
     </div>
 
@@ -382,19 +382,19 @@ textarea.field{resize:vertical;line-height:1.6;}
     </div>
 
     <div class="mtab-panel" id="mtab-staples">
-      <p class="hint">Weekly staples — always pre-ticked on the front screen. Edit qty inline.</p>
+      <p class="hint">Essentials — always pre-ticked on the front screen. Edit qty inline.</p>
       <div class="edit-field-labels"><div class="edit-field-label">Item</div><div class="edit-field-label">Default qty</div><div></div></div>
       <div class="edit-item-list" id="staples-editor"></div>
-      <button class="btn-add-item" onclick="addRow('staples')">+ Add staple</button>
-      <button class="btn-save-list" onclick="saveList('staples')">Save staples</button>
+      <button class="btn-add-item" onclick="addRow('staples')">+ Add essential</button>
+      <button class="btn-save-list" onclick="saveList('staples')">Save essentials</button>
     </div>
 
     <div class="mtab-panel" id="mtab-regulars">
-      <p class="hint">Regulars — unticked by default each week. Tap to add what you need.</p>
+      <p class="hint">Favourites — unticked by default each week. Tap to add what you need.</p>
       <div class="edit-field-labels"><div class="edit-field-label">Item</div><div class="edit-field-label">Default qty</div><div></div></div>
       <div class="edit-item-list" id="regulars-editor"></div>
-      <button class="btn-add-item" onclick="addRow('regulars')">+ Add regular</button>
-      <button class="btn-save-list" onclick="saveList('regulars')">Save regulars</button>
+      <button class="btn-add-item" onclick="addRow('regulars')">+ Add favourite</button>
+      <button class="btn-save-list" onclick="saveList('regulars')">Save favourites</button>
     </div>
 
     <div class="mtab-panel" id="mtab-backup">
@@ -436,10 +436,10 @@ textarea.field{resize:vertical;line-height:1.6;}
 
   <!-- 2. STAPLES (permanent quick-add list) -->
   <div class="section">
-    <div class="sec-label">Staples <span style="color:var(--ink3);font-size:9px;margin-left:4px">TAP TO ADD THIS WEEK</span></div>
+    <div class="sec-label">Favourites <span style="color:var(--ink3);font-size:9px;margin-left:4px">TAP TO ADD THIS WEEK</span></div>
     <div class="regular-list" id="regulars-list"></div>
     <div style="display:flex;gap:6px;margin-top:8px;">
-      <input class="field" type="text" id="staples-quick-input" placeholder="Add a staple permanently…" style="margin-bottom:0;" onkeydown="if(event.key==='Enter')staplesQuickAdd()">
+      <input class="field" type="text" id="staples-quick-input" placeholder="Add a favourite permanently…" style="margin-bottom:0;" onkeydown="if(event.key==='Enter')staplesQuickAdd()">
       <button onclick="staplesQuickAdd()" style="background:var(--accent);color:#0F0F0D;border:none;border-radius:6px;font-family:var(--sans);font-size:12px;font-weight:500;padding:0 14px;cursor:pointer;white-space:nowrap;flex-shrink:0;">Add</button>
     </div>
   </div>
@@ -1054,7 +1054,7 @@ function renderFridgeList(){
   document.getElementById('fridge-date').textContent=listData.date;
   let html='',idx=0;
   const sec=(label,items)=>{if(!items||!items.length)return'';let s='<div class="fridge-section"><div class="fridge-sec-head">'+label+'</div>';items.forEach(i=>{const ci=idx++;s+='<div class="fridge-item" id="fi-'+ci+'"><div class="fi-check" onclick="toggleShop('+ci+')"></div><div class="fi-text" onclick="toggleShop('+ci+')"><div class="fi-name">'+esc(i.name)+'</div>'+(i.qty?'<div class="fi-qty">'+esc(i.qty)+'</div>':'')+'</div><button class="fi-have" onclick="toggleHave('+ci+')">already got it</button></div>';});return s+'</div>';};
-  html+=sec('Weekly staples',listData.staples);html+=sec('Regulars',listData.regulars);
+  html+=sec('Essentials',listData.staples);html+=sec('Favourites',listData.regulars);
   listData.recipes?.forEach(r=>{html+=sec(r.name,r.items);});
   if(listData.extras?.length)html+=sec('Fridge list & extras',listData.extras);
   document.getElementById('fridge-sections').innerHTML=html;
@@ -1089,8 +1089,8 @@ async function markOrdered(){
 
 function buildText(d){
   let t='This week\'s shop — '+d.date+'\n'+'─'.repeat(28)+'\n';
-  if(d.staples?.length){t+='\nWEEKLY STAPLES\n';d.staples.forEach(s=>{t+='• '+s.name+(s.qty?' '+s.qty:'')+'\n';});}
-  if(d.regulars?.length){t+='\nREGULARS\n';d.regulars.forEach(r=>{t+='• '+r.name+(r.qty?' '+r.qty:'')+'\n';});}
+  if(d.staples?.length){t+='\nESSENTIALS\n';d.staples.forEach(s=>{t+='• '+s.name+(s.qty?' '+s.qty:'')+'\n';});}
+  if(d.regulars?.length){t+='\nFAVOURITES\n';d.regulars.forEach(r=>{t+='• '+r.name+(r.qty?' '+r.qty:'')+'\n';});}
   d.recipes?.forEach(r=>{t+='\n'+r.name.toUpperCase()+'\n';r.items?.forEach(i=>{t+='• '+(i.qty?i.qty+' ':'')+i.name+'\n';});});
   if(d.extras?.length){t+='\nEXTRAS\n';d.extras.forEach(e=>{t+='• '+e.name+'\n';});}
   return t;
@@ -1128,7 +1128,7 @@ function loadShared(enc){
     document.getElementById('share-meta').textContent=d.date+' · tap items to tick off';
     let html='',idx=0;
     const sec=(label,items)=>{if(!items||!items.length)return'';let s='<div class="share-section"><div class="share-sec-head">'+label+'</div>';items.forEach(i=>{const ci=idx++;s+='<div class="share-item" id="si-'+ci+'" onclick="shareTick('+ci+')"><div class="si-check"></div><div class="si-label"><div class="si-name">'+esc(i.name)+'</div>'+(i.qty?'<div class="si-qty">'+esc(i.qty)+'</div>':'')+'</div></div>';});return s+'</div>';};
-    html+=sec('Weekly staples',d.staples);html+=sec('Regulars',d.regulars);d.recipes?.forEach(r=>{html+=sec(r.name,r.items);});html+=sec('Extras',d.extras);
+    html+=sec('Essentials',d.staples);html+=sec('Favourites',d.regulars);d.recipes?.forEach(r=>{html+=sec(r.name,r.items);});html+=sec('Extras',d.extras);
     document.getElementById('share-sections').innerHTML=html;updateShareProgress();
   }catch(e){console.error('Share load error:',e);showMainPage('planner');}
 }
@@ -1144,7 +1144,7 @@ function renderArchive(){
     const date=a.archivedAt?new Date(a.archivedAt).toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short',year:'numeric'}):a.date||'Unknown';
     const total=(a.staples?.length||0)+(a.regulars?.length||0)+(a.recipes?.reduce((t,r)=>t+(r.items?.length||0),0)||0)+(a.extras?.length||0);
     const names=a.recipes?.map(r=>r.name).join(', ')||'';
-    return '<div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);margin-bottom:12px;overflow:hidden;"><div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;"><div><div style="font-family:var(--serif);font-size:17px;letter-spacing:-0.01em;">'+date+'</div><div style="font-size:12px;color:var(--ink3);margin-top:3px;">'+total+' items · '+(names||'No recipes')+'</div></div><button onclick="toggleArchiveDetail('+idx+')" id="arch-btn-'+idx+'" style="background:none;border:1px solid var(--border2);border-radius:5px;font-family:var(--sans);font-size:11px;color:var(--ink3);padding:5px 10px;cursor:pointer;">View</button></div><div id="arch-detail-'+idx+'" style="display:none;">'+archSec('Staples',a.staples)+archSec('Regulars',a.regulars)+(a.recipes||[]).map(r=>'<div style="padding:8px 16px 4px;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);">'+esc(r.name)+'</div>'+(r.items||[]).map(i=>'<div style="padding:5px 16px;border-top:1px solid var(--border);font-size:13px;color:var(--ink2);">'+(i.qty?'<span style="color:var(--accent);">'+esc(i.qty)+'</span> ':'')+esc(i.name)+'</div>').join('')).join('')+archSec('Extras',a.extras)+'</div></div>';
+    return '<div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);margin-bottom:12px;overflow:hidden;"><div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;"><div><div style="font-family:var(--serif);font-size:17px;letter-spacing:-0.01em;">'+date+'</div><div style="font-size:12px;color:var(--ink3);margin-top:3px;">'+total+' items · '+(names||'No recipes')+'</div></div><button onclick="toggleArchiveDetail('+idx+')" id="arch-btn-'+idx+'" style="background:none;border:1px solid var(--border2);border-radius:5px;font-family:var(--sans);font-size:11px;color:var(--ink3);padding:5px 10px;cursor:pointer;">View</button></div><div id="arch-detail-'+idx+'" style="display:none;">'+archSec('Essentials',a.staples)+archSec('Favourites',a.regulars)+(a.recipes||[]).map(r=>'<div style="padding:8px 16px 4px;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);">'+esc(r.name)+'</div>'+(r.items||[]).map(i=>'<div style="padding:5px 16px;border-top:1px solid var(--border);font-size:13px;color:var(--ink2);">'+(i.qty?'<span style="color:var(--accent);">'+esc(i.qty)+'</span> ':'')+esc(i.name)+'</div>').join('')).join('')+archSec('Extras',a.extras)+'</div></div>';
   }).join('');
 }
 function archSec(label,items){if(!items?.length)return'';return'<div style="padding:8px 16px 4px;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink3);">'+label+'</div>'+items.map(s=>'<div style="padding:5px 16px;border-top:1px solid var(--border);font-size:13px;color:var(--ink2);">'+(s.qty?'<span style="color:var(--accent);">'+esc(s.qty)+'</span> ':'')+esc(s.name)+'</div>').join('');}

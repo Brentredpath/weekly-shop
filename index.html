@@ -812,7 +812,7 @@ function switchMTab(t){['recipes','staples','regulars','backup'].forEach(x=>{doc
 function getStapleState(id,dq){if(!stapleStates[id])stapleStates[id]={ticked:true,qty:dq};return stapleStates[id];}
 function renderStaplesList(){
   const el=document.getElementById('staples-list');
-  if(!STAPLES.length){el.innerHTML='<div style="padding:14px 16px;font-size:13px;color:var(--ink3)">No staples yet.</div>';return;}
+  if(!STAPLES.length){el.innerHTML='<div style="padding:14px 16px;font-size:13px;color:var(--ink3)">No essentials yet.</div>';return;}
   el.innerHTML=STAPLES.map(s=>{
     const st=getStapleState(s.id,s.qty);
     return `<div class="staple-item ${st.ticked?'ticked':''}" id="staple-${s.id}">
@@ -838,7 +838,7 @@ function saveStapleQty(id){const input=document.getElementById('staple-qty-input
 function getRegularState(id,dq){if(!regularStates[id])regularStates[id]={ticked:false,qty:dq};return regularStates[id];}
 function renderRegularsList(){
   const el=document.getElementById('regulars-list');
-  if(!REGULARS.length){el.innerHTML='<div style="padding:14px 16px;font-size:13px;color:var(--ink3)">No regulars yet.</div>';return;}
+  if(!REGULARS.length){el.innerHTML='<div style="padding:14px 16px;font-size:13px;color:var(--ink3)">No favourites yet.</div>';return;}
   el.innerHTML=REGULARS.map(r=>{
     const st=getRegularState(r.id,r.qty);
     return `<div class="regular-item ${st.ticked?'ticked':''}" id="regular-${r.id}">
@@ -895,7 +895,7 @@ function saveList(type){
   else{REGULARS.length=0;REGULARS.push(...list);ls.set(K.regulars,REGULARS);renderRegularsList();}
   renderEditor(type);
   const btn=document.querySelector('#mtab-'+type+' .btn-save-list');
-  if(btn){btn.textContent='Saved';setTimeout(()=>btn.textContent='Save '+type,1800);}
+  if(btn){btn.textContent='Saved';setTimeout(()=>btn.textContent=type==='staples'?'Save essentials':'Save favourites',1800);}
   syncSave();
 }
 

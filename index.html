@@ -771,7 +771,7 @@ window.addEventListener('DOMContentLoaded',async ()=>{
   // Auto-pull from JSONBin every 30 seconds
   setInterval(async()=>{
     const ok=await syncLoad();
-    if(ok){renderPicker();renderMealPrepPicker();renderSaved();renderStaplesList();renderRegularsList();updateBtn();renderWeekTab();if(listData){renderFridgeList();document.getElementById('tabbar-shop').style.display='';}}
+    if(ok){renderPicker();renderMealPrepPicker();renderSaved();renderStaplesList();renderRegularsList();updateBtn();renderWeekTab();if(listData){document.getElementById('tabbar-shop').style.display='';}}
   },30000);
   // Pre-fill settings inputs
   document.getElementById('jbin-key-input').value=ls.get(JBIN_KEY,'');
@@ -1154,7 +1154,7 @@ function exportData(){const data={recipes,staples:STAPLES,regulars:REGULARS,expo
 function copyExportData(){const data={recipes,staples:STAPLES,regulars:REGULARS,exportedAt:new Date().toISOString(),version:'v2'};navigator.clipboard.writeText(JSON.stringify(data,null,2)).then(()=>{const b=document.querySelector('#mtab-backup .btn-save-list');if(b){b.textContent='Copied!';setTimeout(()=>b.textContent='Copy as JSON',2000);}});}
 function importData(){const raw=document.getElementById('import-data').value.trim();const status=document.getElementById('import-status');if(!raw){status.textContent='Paste your JSON first.';return;}try{const data=JSON.parse(raw);if(!data.recipes||!Array.isArray(data.recipes)){status.textContent='Invalid format.';return;}if(!confirm('Replace current '+recipes.length+' recipes and lists?'))return;recipes=data.recipes;ls.set(K.rec,recipes);if(data.staples){STAPLES.length=0;STAPLES.push(...data.staples);ls.set(K.staples,STAPLES);}if(data.regulars){REGULARS.length=0;REGULARS.push(...data.regulars);ls.set(K.regulars,REGULARS);}renderPicker();renderMealPrepPicker();renderSaved();renderStaplesList();renderRegularsList();updateBtn();renderWeekTab();document.getElementById('import-data').value='';status.textContent='Imported '+recipes.length+' recipes.';}catch{status.textContent='Could not parse JSON.';}}
 
-const FMT_SYS='You are a recipe formatter assistant. When given recipe text, extract and return ONLY a raw JSON object — no markdown, no backticks, no explanation before or after. The JSON must have exactly this shape: {"message":"One friendly sentence about what you did.","recipe":{"name":"Recipe name","tags":["tag1","tag2"],"serves":4,"type":"dinner","ingredients":[{"qty":"500g","name":"chicken mince"}],"steps":["Full step one with amounts inline.","Full step two."]}} If asked to modify a recipe, apply the change and return the full updated recipe in the same format. type must be dinner or mealprep. serves must be an integer. Return the raw JSON object and nothing else — no text before, no text after, no code fences.';
+const FMT_SYS='You are a recipe formatter assistant. When given recipe text, extract and return ONLY a raw JSON object — no markdown, no backticks, no explanation before or after. The JSON must have exactly this shape: {"message":"One friendly sentence about what you did.","recipe":{"name":"Recipe name","tags":["tag1","tag2"],"serves":4,"type":"dinner","ingredients":[{"qty":"500g","name":"chicken mince"}],"steps":["Full step one with amounts inline.","Full step two."]}} If asked to modify a recipe, apply the change and return the full updated recipe in the same format. type must be dinner or mealprep. serves must be an integer. IMPORTANT: Always use metric measurements (g, kg, ml, L, tsp, tbsp) — never use cups, oz, lbs, or other imperial units. Always use British English food terminology: mince (not ground beef/pork), coriander (not cilantro), aubergine (not eggplant), courgette (not zucchini), spring onion (not scallion), plain flour (not all-purpose flour), etc. Return the raw JSON object and nothing else — no text before, no text after, no code fences.';
 async function formatRecipe(){
   const input=document.getElementById('paste-recipe');const raw=input.value.trim();if(!raw){setFormatStatus('Paste a recipe or type a change first.');return;}
   const btn=document.getElementById('btn-format');btn.disabled=true;btn.textContent='Thinking…';setFormatStatus('');
@@ -1198,7 +1198,8 @@ async function formatRecipe(){
     fmtLastParsed=recipe;
     fmtHistory.push({role:'user',content:raw});
     fmtHistory.push({role:'assistant',content:text});
-    addFmtBubble('assistant',message,'<strong>'+esc(recipe.name)+'</strong> · Serves '+(recipe.serves||4)+' · '+(recipe.ingredients?.length||0)+' ingredients');
+    const ingList=(recipe.ingredients||[]).map(i=>(i.qty?i.qty+' ':'')+esc(i.name)).join('<br>');
+    addFmtBubble('assistant',message,'<strong>'+esc(recipe.name)+'</strong> · Serves '+(recipe.serves||4)+'<br><span style="opacity:0.7;font-size:11px;">'+ingList+'</span>');
     document.getElementById('btn-accept-recipe').style.display='';
     setFormatStatus('Looks right? Hit Accept — or keep chatting to refine.');
   }catch(err){addFmtBubble('assistant','Outer error: '+err.message,'');console.error('Outer error:',err);}
